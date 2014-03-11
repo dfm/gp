@@ -1,6 +1,8 @@
 Gaussian Process Demos
 ======================
 
+The standard GP reference is [Rasmussen & Williams](http://www.gaussianprocess.org/gpml/) and my slides are [here](https://speakerdeck.com/dfm/an-astronomers-introduction-to-gaussian-processes).
+
 Contents
 --------
 
