@@ -1,0 +1,210 @@
+\documentclass[12pt,preprint]{aastex}
+
+\include{vc}
+
+\usepackage{color,hyperref}
+\definecolor{linkcolor}{rgb}{0,0,0.5}
+\hypersetup{colorlinks=true,linkcolor=linkcolor,citecolor=linkcolor,
+            filecolor=linkcolor,urlcolor=linkcolor}
+\usepackage{url}
+\usepackage{amssymb,amsmath}
+\usepackage{subfigure}
+
+\usepackage{listings}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{language=Python,
+        basicstyle=\footnotesize\ttfamily,
+        belowskip=-3pt,
+        showspaces=false,
+        showstringspaces=false,
+        tabsize=2,
+        breaklines=false,
+        breakatwhitespace=true,
+        identifierstyle=\ttfamily,
+        keywordstyle=\bfseries\color[rgb]{0.133,0.545,0.133},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+    }
+
+\newcommand{\project}[1]{{\sffamily #1}}
+\newcommand{\ipython}{\project{IPython}}
+\newcommand{\paper}{\textsl{Worksheet}}
+
+\newcommand{\foreign}[1]{\emph{#1}}
+\newcommand{\etal}{\foreign{et\,al.}}
+\newcommand{\etc}{\foreign{etc.}}
+
+\newcommand{\Fig}[1]{Figure~\ref{fig:#1}}
+\newcommand{\fig}[1]{\Fig{#1}}
+\newcommand{\figlabel}[1]{\label{fig:#1}}
+\newcommand{\Tab}[1]{Table~\ref{tab:#1}}
+\newcommand{\tab}[1]{\Tab{#1}}
+\newcommand{\tablabel}[1]{\label{tab:#1}}
+\newcommand{\Eq}[1]{Equation~(\ref{eq:#1})}
+\newcommand{\eq}[1]{\Eq{#1}}
+\newcommand{\eqalt}[1]{Equation~\ref{eq:#1}}
+\newcommand{\eqlabel}[1]{\label{eq:#1}}
+\newcommand{\Sect}[1]{Section~\ref{sect:#1}}
+\newcommand{\sect}[1]{\Sect{#1}}
+\newcommand{\App}[1]{Appendix~\ref{sect:#1}}
+\newcommand{\app}[1]{\App{#1}}
+\newcommand{\sectlabel}[1]{\label{sect:#1}}
+
+\newcommand{\dd}{\ensuremath{\,\mathrm{d}}}
+\newcommand{\bvec}[1]{\ensuremath{\boldsymbol{#1}}}
+
+\begin{document}
+
+\title{%
+    Gaussian processes lab worksheet
+}
+
+\author{%
+    Daniel~Foreman-Mackey\altaffilmark{1}
+}
+\altaffiltext{1}{Center for Cosmology and Particle Physics,
+                 Department of Physics, New York University,
+                 4 Washington Place, New York, NY, 10003, USA;
+                 \url{danfm@nyu.edu}}
+
+In this lab, we'll work through two example problems in Gaussian process
+regression using Python.
+In the first example, we'll get our feet wet by fitting a linear model to data
+with correlated uncertainties and a small number of data points where
+performance isn't a huge limiting factor.
+Then, after benchmarking and optimizing the code, we'll fit for the location,
+width and amplitude of a Gaussian ``feature'' imposed on a
+not-entirely-trivial continuum function.
+This example is similar to what you might want to do when fitting a spectral
+feature or a simplified version of fitting the location and parameters of a
+transiting exoplanet.
+
+The lab is designed to be open-ended and the last sections should be
+instructive even for students who are already familiar with the implementation
+of Gaussian processes.
+I've chosen to use Python for the lab because it is my programming language of
+choice and because it is becoming commonly used in astronomy.
+If you don't have experience coding in Python I've tried to include a lot of
+skeleton code so you should still be able to make progress without getting too
+caught up in that funny Python syntax.
+
+\section{Fitting a line to data with correlated noise}
+
+\subsection{Getting started}
+
+The first thing to do is SSH into the cluster, load the data, and plot it so
+that we know what we're getting into.
+After SSHing into the cluster (don't forget to use \texttt{X}; we'll want to
+be able to look at our figures interactively), start a Python session and
+import the provided helper module:
+\begin{lstlisting}
+% python
+>>> import gp
+\end{lstlisting}
+This module provides a few bells and whistles to help the lab run smoothly but
+if you're interested, you can check out the source code online at
+\url{https://github.com/dfm/gp}.
+
+Now, let's load and plot the data:
+\begin{lstlisting}
+>>> x, y, yerr = gp.line.get_data()
+>>> gp.line.plot_data(x, y, yerr)
+\end{lstlisting}
+The plot is generated using \project{matplotlib} and it should appear in a
+window on your machine looking something like \fig{line-data}.
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/line_data.pdf}
+\end{center}
+\caption{%
+The points with error bars are the data for the linear fit section and the
+black line shows the true model that was used to generate the data.
+\figlabel{line-data}}
+\end{figure}
+
+\subsection{Linear least squares}
+
+Now we'll run our baseline model: linear least squares.
+In this model, we'll assume that the uncertainties are known, independent, and
+Gaussian.
+For simplicity, I've implemented this model for you even though it's only a
+couple of lines of code.
+You can run it as follows:
+\begin{lstlisting}
+>>> mu, cov = gp.line.least_squares(x, y, yerr)
+\end{lstlisting}
+This function returns the mean and covariance of the Gaussian posterior
+constraints on the slope $m$ and intercept $b$ of the line and if you print
+these at the command line, you should see
+\begin{lstlisting}
+>>> print(mu)
+[ 0.36482633  0.1229681 ]
+>>> print(cov)
+[[  1.10886015e-04   4.41514429e-05]
+ [  4.41514429e-05   9.78666012e-04]]
+\end{lstlisting}
+which is very far away from the true values
+\begin{eqnarray}
+m = 0.5 &\mathrm{and}& b = -0.25 \quad.
+\end{eqnarray}
+
+To demonstrate just how bad this result is, let's plot it on top of the data.
+To do this, we need to generate a list of samples (let's say 20,000, this
+time) from this posterior distribution.
+Luckily, \project{numpy} has a built in function for generating samples from a
+multivariate Gaussian
+\begin{lstlisting}
+>>> import numpy as np
+>>> samples = np.random.multivariate_normal(mu, cov, 20000)
+\end{lstlisting}
+And then we can plot the results:
+\begin{lstlisting}
+>>> gp.line.plot_results(x, y, yerr, samples)
+\end{lstlisting}
+This should show two figures.
+The first should look something like \fig{line-lls-triangle}, showing the
+constraints in the two-dimensional parameter space.
+The true value is so far that it isn't even visible on this plot.
+The second figure should look something like \fig{line-lls} where the
+predicted line is shown as the red area.
+
+This result is very precise but (since we know the true value) we can see that
+it is also very inaccurate.
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/line_lls_triangle.pdf}
+\end{center}
+\caption{%
+\figlabel{line-lls-triangle}}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/line_lls.pdf}
+\end{center}
+\caption{%
+\figlabel{line-lls}}
+\end{figure}
+
+
+All of the code used in the making of this worksheet is available from
+\url{https://github.com/dfm/gp} under the MIT open-source software license.
+This version was generated with git commit \texttt{\githash} (\gitdate).
+
+\newcommand{\arxiv}[1]{\href{http://arxiv.org/abs/#1}{arXiv:#1}}
+\begin{thebibliography}{}\raggedright
+
+\bibitem[Ambikasaran \etal(2014)]{dfm-gp}
+Ambikasaran, S., Foreman-Mackey, D., Greengard, L., Hogg, D.~W.,
+\& O'Neil, M.\ 2014, \arxiv{1403.6015}
+
+\bibitem[Rasmussen \& Williams(2006)]{gp}
+Rasmussen, C.~E. \& Williams, C.~K.~I.\ 2006
+Gaussian Processes for Machine Learning, MIT Press
+(\href{http://www.gaussianprocess.org/gpml/}{online})
+
+\end{thebibliography}
+
+\end{document}
