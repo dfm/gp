@@ -129,7 +129,8 @@ Now we'll run our baseline model: linear least squares.
 In this model, we'll assume that the uncertainties are known, independent, and
 Gaussian.
 For simplicity, I've implemented this model for you even though it's only a
-couple of lines of code.
+couple of lines of code%
+\footnote{\url{https://github.com/dfm/gp/blob/master/gp/line/lls.py}}.
 You can run it as follows:
 \begin{lstlisting}
 >>> mu, cov = gp.line.least_squares(x, y, yerr)
@@ -187,6 +188,61 @@ it is also very inaccurate.
 \caption{%
 \figlabel{line-lls}}
 \end{figure}
+
+\subsection{The Gaussian likelihood function}
+
+Now let's implement the code for a Gaussian process.
+The main thing that you need to do in this section is write the
+(ln-)likelihood function.
+What you need to do is convert the following equation to Python (I'll give
+some pointers in a moment)
+\begin{eqnarray}\eqlabel{lnlike}
+\ln L - C &=& -\frac{1}{2}\,\bvec{r}^\mathrm{T}\,\bvec{K}^{-1}\,\bvec{r}
+              -\frac{1}{2}\,\ln \mathrm{det}\,\bvec{K}
+\end{eqnarray}
+where $C$ is an irrelevant constant, $\bvec{r}$ is the residual vector, and
+$\bvec{K}$ is the covariance matrix.
+What we want is a function like
+\begin{lstlisting}
+def lnlike(r, K):
+    ...
+\end{lstlisting}
+that takes in a vector \texttt{r} and a matrix \texttt{K} and returns the
+right-hand side of \eq{lnlike}.
+One thing to think about while you do this is that you should \emph{never}
+invert a matrix.
+Instead, to find $\bvec{x}$ in this equation
+\begin{eqnarray}
+\bvec{x} = \bvec{K}^{-1}\,\bvec{r} &\to& \bvec{r} = \bvec{K}\,\bvec{x}
+\end{eqnarray}
+you should use something like the \project{numpy} function
+\texttt{linalg.solve}\footnote{\url{%
+http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.solve.html}}.
+Another useful function is \texttt{numpy.linalg.slogdet}\footnote{\url{%
+http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.slogdet.html}}.
+that computes the sign and ln-determinant of a matrix.
+This is much more numerically stable than computing the determinant directly
+and in \eq{lnlike} we only ever use the ln-determinant.
+
+To check that the likelihood function that you wrote is correct, save it in a
+Python file (called something like \texttt{gp\_likelihood.py}, for example)
+with the following format:
+\begin{lstlisting}[frame=single]
+# The file gp_likelihood.py
+
+import gp
+import numpy as np
+
+def lnlike(r, K):
+    ...
+
+gp.test_lnlike(lnlike)
+\end{lstlisting}
+Then, when you run this script
+\begin{lstlisting}
+% python gp_likelihood.py
+\end{lstlisting}
+it will raise an error if there is a problem with your code.
 
 
 All of the code used in the making of this worksheet is available from
