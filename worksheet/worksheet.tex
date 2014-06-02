@@ -26,6 +26,10 @@
         stringstyle=\color[rgb]{0.627,0.126,0.941},
     }
 
+\usepackage{algorithmic,algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
 \newcommand{\project}[1]{{\sffamily #1}}
 \newcommand{\ipython}{\project{IPython}}
 \newcommand{\paper}{\textsl{Worksheet}}
@@ -92,22 +96,44 @@ caught up in that funny Python syntax.
 
 \subsection{Getting started}
 
-The first thing to do is SSH into the cluster, load the data, and plot it so
-that we know what we're getting into.
-After SSHing into the cluster (don't forget to use \texttt{X}; we'll want to
-be able to look at our figures interactively), start a Python session and
-import the provided helper module:
+For the first half of this section, we'll be working interactively so we'll
+use the Hammer%
+\footnote{\url{https://rcc.its.psu.edu/user_guides/systems/hammer/}} system
+and the provided Python 2.7.3.
+To get there, SSH using the command:
 \begin{lstlisting}
-% python
+% ssh -X YOUR_USER_NAME@hammer.rcc.psu.edu
+\end{lstlisting}
+At the prompt, enter your password and then load the modules that we'll need:
+\begin{lstlisting}
+% module load git
+% module load python/2.7.3
+\end{lstlisting}
+
+The data and some skeleton code for this lab is available on GitHub%
+\footnote{\url{https://github.com/dfm/gp}} and you can get it by running:
+\begin{lstlisting}
+% cd work
+% git clone https://github.com/dfm/gp
+% cd gp
+\end{lstlisting}
+
+If everything worked as planned, you should now be able to run Python (we'll
+use \ipython\footnote{\url{http://ipython.org/}} for our interactive work) and
+import the helper module:
+\begin{lstlisting}
+% ipython
 >>> import gp
 \end{lstlisting}
 This module provides a few bells and whistles to help the lab run smoothly but
-if you're interested, you can check out the source code online at
-\url{https://github.com/dfm/gp}.
+if you're interested, you should definitely check out the source code online
+at \url{https://github.com/dfm/gp}.
 
-Now, let's load and plot the data:
+\subsection{Working with the data}
+
+You should now be able to load and plot the data:
 \begin{lstlisting}
->>> x, y, yerr = gp.line.get_data()
+>>> x, y, yerr = gp.line.load_data()
 >>> gp.line.plot_data(x, y, yerr)
 \end{lstlisting}
 The plot is generated using \project{matplotlib} and it should appear in a
@@ -198,7 +224,7 @@ What you need to do is convert the following equation to Python (I'll give
 some pointers in a moment)
 \begin{eqnarray}\eqlabel{lnlike}
 \ln L - C &=& -\frac{1}{2}\,\bvec{r}^\mathrm{T}\,\bvec{K}^{-1}\,\bvec{r}
-              -\frac{1}{2}\,\ln \mathrm{det}\,\bvec{K}
+              -\frac{1}{2}\,\ln \det \bvec{K}
 \end{eqnarray}
 where $C$ is an irrelevant constant, $\bvec{r}$ is the residual vector, and
 $\bvec{K}$ is the covariance matrix.
@@ -216,13 +242,30 @@ Instead, to find $\bvec{x}$ in this equation
 \bvec{x} = \bvec{K}^{-1}\,\bvec{r} &\to& \bvec{r} = \bvec{K}\,\bvec{x}
 \end{eqnarray}
 you should use something like the \project{numpy} function
-\texttt{linalg.solve}\footnote{\url{%
+\texttt{np.linalg.solve}\footnote{\url{%
 http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.solve.html}}.
-Another useful function is \texttt{numpy.linalg.slogdet}\footnote{\url{%
-http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.slogdet.html}}.
+Another useful function is \texttt{np.linalg.slogdet}\footnote{\url{%
+http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.slogdet.html%
+}}.
 that computes the sign and ln-determinant of a matrix.
 This is much more numerically stable than computing the determinant directly
 and in \eq{lnlike} we only ever use the ln-determinant.
+
+Your code should roughly follow the format of the pseudo-code given below in
+Algorithm~\ref{algo:lnlike}:
+\begin{algorithm}
+\caption{Pseudo-code for computing the Gaussian process likelihood.
+         \label{algo:lnlike}}
+\begin{algorithmic}[1]
+
+\REQUIRE Residual vector \bvec{r}; covariance matrix \bvec{K}
+\ENSURE The ln-likelihood (up to a constant)
+\STATE $\bvec{\alpha} \gets \mathtt{np.linalg.solve}(\bvec{K},\,\bvec{r})$
+\STATE $(s,\,d) \gets \mathtt{np.linalg.slogdet}(\bvec{K})$
+\RETURN $-0.5\,\left(\bvec{r}\cdot\bvec{\alpha} + d\right)$
+
+\end{algorithmic}
+\end{algorithm}
 
 To check that the likelihood function that you wrote is correct, save it in a
 Python file (called something like \texttt{gp\_likelihood.py}, for example)
@@ -234,9 +277,9 @@ import gp
 import numpy as np
 
 def lnlike(r, K):
-    ...
+    # Write the code for Algorithm 1 here
 
-gp.test_lnlike(lnlike)
+gp.utils.test_lnlike(lnlike)
 \end{lstlisting}
 Then, when you run this script
 \begin{lstlisting}
@@ -244,6 +287,33 @@ Then, when you run this script
 \end{lstlisting}
 it will raise an error if there is a problem with your code.
 
+Next, we need to implement the kernel function.
+This will take in a distance $\Delta x$ and a vector of parameters
+$(\alpha, \tau)$, and return
+\begin{eqnarray}\eqlabel{kernel}
+k(\Delta x) &=& \alpha^2\,\exp \left(-\frac{\Delta x^2}{2\,\tau^2}\right) \quad.
+\end{eqnarray}
+To do this, add the following skeleton code to the bottom of of your source
+code file:
+\begin{lstlisting}[frame=single]
+# Continuation of the file gp_likelihood.py
+
+def kernel(params, dx):
+    # Implement the kernel equation here
+
+gp.utils.test_kernel(kernel)
+\end{lstlisting}
+and implement \eq{kernel} as indicated.
+\emph{Note: the} \texttt{kernel} \emph{function should be able to handle
+\project{numpy} arrays so you should use the function} \texttt{np.exp}
+\emph{for exponentiation.}
+If you run your script again:
+\begin{lstlisting}
+% python gp_likelihood.py
+\end{lstlisting}
+it will fail if the kernel function isn't implemented correctly.
+
+\subsection{Benchmarking}
 
 All of the code used in the making of this worksheet is available from
 \url{https://github.com/dfm/gp} under the MIT open-source software license.

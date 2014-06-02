@@ -51,10 +51,14 @@ def plot_results(x, y, yerr, samples, truth=True, color="r", data_fig=None):
 
     # Generate the constraints in data space.
     x0 = np.linspace(-5, 5, 500)
-    lines = np.dot(np.vander(x0, 2), samples[:, :2].T)
-    mean = np.mean(lines, axis=1)
-    std = np.std(lines, axis=1)
-    data_ax.fill_between(x0, mean+std, mean-std, color=color, alpha=0.3)
+    samples = np.atleast_1d(samples)
+    if samples.shape == 2:
+        lines = np.dot(np.vander(x0, 2), samples[:, :2].T)
+        mean = np.mean(lines, axis=1)
+        std = np.std(lines, axis=1)
+        data_ax.fill_between(x0, mean+std, mean-std, color=color, alpha=0.3)
+    else:
+        data_ax.plot(x0, np.dot(np.vander(x0, 2), samples[:2]), color=color)
 
     # Plot the triangle plot.
     triangle_fig = triangle.corner(samples, bins=24,
