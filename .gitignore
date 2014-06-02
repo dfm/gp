@@ -1,2 +1,5 @@
 .DS_Store
 .ipynb_checkpoints
+*.pyc
+*.txt
+dfm_gp.py

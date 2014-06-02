@@ -11,3 +11,4 @@ pl.ion()
 
 from . import line
 from . import utils
+from .benchmarking import benchmark

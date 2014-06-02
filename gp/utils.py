@@ -3,7 +3,7 @@
 
 from __future__ import division, print_function
 
-__all__ = ["DATA_DIR", "load_data"]
+__all__ = ["DATA_DIR", "load_data", "test_lnlike", "test_kernel"]
 
 import os
 import numpy as np
