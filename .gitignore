@@ -3,3 +3,5 @@
 *.pyc
 *.txt
 dfm_gp.py
+*.pdf
+*.png

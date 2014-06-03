@@ -52,12 +52,15 @@ def benchmark(name, kernelfn, lnlikefn, params, N=2 ** np.arange(8, 12)):
                                 ("total", "b")]):
         x, y = np.log10(N), np.log10(t[:, i])
         p = np.polyfit(x, y, 1)
-        ax.plot(x, y, "o", label="{0} O(N^{1:.2f})".format(l, p[0]), color=c)
+        ax.plot(x, y, "o", label="{0} [{1:.2f}]".format(l, p[0]), color=c)
         ax.plot(x, np.polyval(p, x), color=c)
     ax.set_title(name)
     ax.set_xlabel("log10(time)")
     ax.set_ylabel("log10(N)")
     ax.legend(loc="lower right")
-    pl.show(block=True)
+
+    plot_fn = "benchmark-{0}.pdf".format(name)
+    print("Saving plot to '{0}'".format(plot_fn))
+    fig.savefig(plot_fn)
 
     return N, t
