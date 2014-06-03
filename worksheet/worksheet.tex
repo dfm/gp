@@ -268,10 +268,10 @@ Algorithm~\ref{algo:lnlike}:
 \end{algorithm}
 
 To check that the likelihood function that you wrote is correct, save it in a
-Python file (called something like \texttt{gp\_likelihood.py}, for example)
+Python file (called something like \texttt{my\_gp.py}, for example)
 with the following format:
 \begin{lstlisting}[frame=single]
-# The file gp_likelihood.py
+# The file my_gp.py
 
 import gp
 import numpy as np
@@ -283,7 +283,7 @@ gp.utils.test_lnlike(lnlike)
 \end{lstlisting}
 Then, when you run this script
 \begin{lstlisting}
-% python gp_likelihood.py
+% python my_gp.py
 \end{lstlisting}
 it will raise an error if there is a problem with your code.
 
@@ -296,7 +296,7 @@ k(\Delta x) &=& \alpha^2\,\exp \left(-\frac{\Delta x^2}{2\,\tau^2}\right) \quad.
 To do this, add the following skeleton code to the bottom of of your source
 code file:
 \begin{lstlisting}[frame=single]
-# Continuation of the file gp_likelihood.py
+# Continuation of the file my_gp.py
 
 def kernel(params, dx):
     # Implement the kernel equation here
@@ -309,13 +309,26 @@ and implement \eq{kernel} as indicated.
 \emph{for exponentiation.}
 If you run your script again:
 \begin{lstlisting}
-% python gp_likelihood.py
+% python my_gp.py
 \end{lstlisting}
 it will fail if the kernel function isn't implemented correctly.
 
 \subsection{Benchmarking}
 
-Let's take a moment now to benchmark our code.
+Let's take a moment now to benchmark our code and see how each component
+scales with the size of the dataset.
+There is a function included in the \texttt{gp} module that runs a bunch of
+tests with datasets of different sizes and plots the results.
+To benchmark your implementation, you can call this function as follows:
+\begin{lstlisting}[frame=single]
+# Continuation of the file my_gp.py
+
+hyper = [1.0, 0.1]
+gp.benchmark("basic", kernel, lnlike, hyper)
+pl.show(block=True)
+\end{lstlisting}
+
+
 
 
 
