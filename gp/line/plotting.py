@@ -41,7 +41,8 @@ def plot_data(x, y, yerr, fig=None, truth=True):
     return fig
 
 
-def plot_results(x, y, yerr, samples, truth=True, color="r", data_fig=None):
+def plot_results(x, y, yerr, samples, truth=True, color="r", data_fig=None,
+                 show=True):
     if data_fig is None:
         # Plot the data.
         data_fig = plot_data(x, y, yerr, truth=truth)
@@ -60,12 +61,15 @@ def plot_results(x, y, yerr, samples, truth=True, color="r", data_fig=None):
     else:
         data_ax.plot(x0, np.dot(np.vander(x0, 2), samples[:2]), color=color)
 
-    # Plot the triangle plot.
-    true = load_data("line_true_params.txt")
-    true[2:] = np.log(true[2:])
-    triangle_fig = triangle.corner(samples, bins=24,
-                                   labels=["m", "b", "ln(alpha)", "ln(ell)"],
-                                   truths=true)
+    if show:
+        # Plot the triangle plot.
+        true = load_data("line_true_params.txt")
+        true[2:] = np.log(true[2:])
+        triangle_fig = triangle.corner(samples, bins=24,
+                                       labels=["m", "b", "ln(alpha)", "ln(ell)"],
+                                       truths=true)
+    else:
+        triangle_fig = None
 
     _format_axes(data_ax)
     return data_fig, triangle_fig
