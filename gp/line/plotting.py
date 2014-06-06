@@ -52,7 +52,7 @@ def plot_results(x, y, yerr, samples, truth=True, color="r", data_fig=None):
     # Generate the constraints in data space.
     x0 = np.linspace(-5, 5, 500)
     samples = np.atleast_1d(samples)
-    if samples.shape == 2:
+    if len(samples.shape) == 2:
         lines = np.dot(np.vander(x0, 2), samples[:, :2].T)
         mean = np.mean(lines, axis=1)
         std = np.std(lines, axis=1)

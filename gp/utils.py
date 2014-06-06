@@ -24,6 +24,7 @@ def test_lnlike(llfn):
         K = np.exp(-0.5 * ((x[:, None] - x[None, :])/0.1) ** 2)
         K[np.diag_indices_from(K)] += 1e-3
         assert np.allclose(llfn(r, K), _baseline_lnlike(r, K)), N
+    print(u"☺︎")
 
 
 def _baseline_lnlike(r, K):
@@ -39,6 +40,7 @@ def test_kernel(kernelfn):
         k1 = kernelfn(params, x[:, None] - x[None, :])
         k2 = _baseline_kernel(params, x[:, None] - x[None, :])
         assert np.allclose(k1, k2), N
+    print(u"☺︎")
 
 
 def _baseline_kernel(params, dx):
