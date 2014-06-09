@@ -6,11 +6,11 @@ below, change `PORT` to your unique assigned port number.
 First, you need to SSH into the login node and create an SSH tunnel to forward
 the correct port back to your local machine. To do this, run the following
 command from your local terminal (don't forget to substitute the correct port
-number):
+number and your user name):
 
 ```
 # On your local machine:
-ssh -L PORT:localhost:PORT lionxv.rcc.psu.edu
+ssh -L PORT:localhost:PORT USER@lionxv.rcc.psu.edu
 ```
 
 On the cluster, `cd` into your work directory and grab the code that you'll
@@ -44,7 +44,7 @@ the port number):
 
 ```
 # In the interactive job:
-ssh -f -N -R PORT:127.0.0.1:PORT lionxv.rcc.psu.edu
+ssh -f -N -R PORT:127.0.0.1:PORT USER@lionxv.rcc.psu.edu
 ```
 
 And start up IPython (the port... remember):
