@@ -44,7 +44,7 @@ the port number):
 
 ```
 # In the interactive job:
-ssh -f -N -R PORT:127.0.0.1:PORT USER@lionxv.rcc.psu.edu
+ssh -f -N -R PORT:127.0.0.1:PORT lionxv.rcc.psu.edu
 ```
 
 And start up IPython (the port... remember):
