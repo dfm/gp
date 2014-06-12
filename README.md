@@ -13,11 +13,13 @@ number and your user name):
 ssh -L PORT:localhost:PORT USER@lionxv.rcc.psu.edu
 ```
 
-On the cluster, `cd` into your work directory and grab the code that you'll
+On the cluster, `cd` into a work directory and grab the code that you'll
 need from the [GitHub repository](https://github.com/dfm/gp):
 
 ```
 # On the cluster login node:
+cd
+mkdir work
 cd work
 git clone https://github.com/dfm/gp
 cd gp
@@ -28,10 +30,10 @@ be safe):
 
 ```
 # On the cluster login node:
-qsub -I -l nodes=1:ppn=1 -l walltime=2:00:00 -q WHAT_QUEUE_DO_WE_USE
+qsub -I -l nodes=1:ppn=1 -l walltime=2:00:00 -q astro-seminar
 ```
 
-Once that job starts up, load the correct Python module:
+Once that job starts up, load the correct Python module, and cd into the directory the job was submitted from:
 
 ```
 # In the interactive job:
@@ -55,3 +57,6 @@ ipython notebook --no-browser --matplotlib=inline --port=PORT
 
 Finally, on your local machine, open up a web browser and point it at the URL:
 http://localhost:PORT (replacing `PORT` with the right number).
+
+Click on worksheet.ipynb to open an IPython workbook that will provide the rest of the instructions.
+
