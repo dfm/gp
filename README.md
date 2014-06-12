@@ -33,7 +33,8 @@ be safe):
 qsub -I -l nodes=1:ppn=1 -l walltime=2:00:00 -q astro-seminar
 ```
 
-Once that job starts up, load the correct Python module, and cd into the directory the job was submitted from:
+Once that job starts up, load the correct Python module, and `cd` into the
+directory the job was submitted from:
 
 ```
 # In the interactive job:
@@ -58,5 +59,5 @@ ipython notebook --no-browser --matplotlib=inline --port=PORT
 Finally, on your local machine, open up a web browser and point it at the URL:
 http://localhost:PORT (replacing `PORT` with the right number).
 
-Click on worksheet.ipynb to open an IPython workbook that will provide the rest of the instructions.
-
+Click on `worksheet.ipynb` to open an IPython workbook that will provide the
+rest of the instructions.
