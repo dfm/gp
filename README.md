@@ -5,6 +5,9 @@ experience with Python should be necessary to get something out of this.
 This worksheet was originally prepared for a lab section at the Penn State
 Astrostats summer school in 2014.
 
+**Remember**: the best reference for anything related to Gaussian Processes is
+[Rasmussen & Williams](http://www.gaussianprocess.org/gpml/).
+
 
 Prerequisites
 -------------
