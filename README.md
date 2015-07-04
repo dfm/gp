@@ -1,63 +1,47 @@
-For this lab, we'll be running an IPython notebook in an interactive job on
-the Lion-XV cluster. Most of the instructions are there but we have to play a
-little bit of SSH magic to get this to work properly. In all of the steps
-below, change `PORT` to your unique assigned port number.
+This repository contains an interactive IPython worksheet (`worksheet.ipynb`)
+designed to introduce you to Gaussian Process models. Only very minimal
+experience with Python should be necessary to get something out of this.
 
-First, you need to SSH into the login node and create an SSH tunnel to forward
-the correct port back to your local machine. To do this, run the following
-command from your local terminal (don't forget to substitute the correct port
-number and your user name):
+This worksheet was originally prepared for a lab section at the Penn State
+Astrostats summer school in 2014.
 
-```
-# On your local machine:
-ssh -L PORT:localhost:PORT USER@lionxv.rcc.psu.edu
-```
 
-On the cluster, `cd` into a work directory and grab the code that you'll
-need from the [GitHub repository](https://github.com/dfm/gp):
+Prerequisites
+-------------
 
-```
-# On the cluster login node:
-cd
-mkdir work
-cd work
-git clone https://github.com/dfm/gp
-cd gp
-```
+You'll need the standard scientific Python stack (numpy, scipy, and
+matplotlib), a recent (3+) version of [IPython](http://ipython.org/)
+(including the notebook), and [emcee](http://dfm.io/emcee) installed. If you
+don't already have a working Python installation (and maybe even if you do), I
+recommend using the [Anaconda distribution](http://continuum.io/downloads) and
+then running `pip install emcee`.
 
-Then we'll start up an interactive job using PBS (asking for 2 hours just to
-be safe):
+
+Usage
+-----
+
+After you have your Python environment set up, download the code from this
+repository by running:
 
 ```
-# On the cluster login node:
-qsub -I -l nodes=1:ppn=1 -l walltime=2:00:00 -q astro-seminar
+git clone https://github.com/dfm/gp.git
 ```
 
-Once that job starts up, load the correct Python module, and `cd` into the
-directory the job was submitted from:
+or by [clicking here](https://github.com/dfm/gp/archive/master.zip).
+
+Then, navigate into the `gp` directory and run
 
 ```
-# In the interactive job:
-module load python/2.7.3
-cd $PBS_O_WORKDIR
+cp worksheet.ipynb worksheet_in_progress.ipynb
+ipython notebook
 ```
 
-Start a "reverse" SSH tunnel (just trust me on this one; remember to change
-the port number):
+Then, in your web browser, navigate to [localhost:8888](http://localhost:8888)
+and click on `worksheet_in_progress.ipynb` to get started.
 
-```
-# In the interactive job:
-ssh -f -N -R PORT:127.0.0.1:PORT lionxv.rcc.psu.edu
-```
 
-And start up IPython (the port... remember):
+License
+-------
 
-```
-ipython notebook --no-browser --matplotlib=inline --port=PORT
-```
-
-Finally, on your local machine, open up a web browser and point it at the URL:
-http://localhost:PORT (replacing `PORT` with the right number).
-
-Click on `worksheet.ipynb` to open an IPython workbook that will provide the
-rest of the instructions.
+This repository and the worksheet are copyright 2015 Dan Foreman-Mackey and
+they are made available under the terms of the MIT license.

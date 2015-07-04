@@ -7,3 +7,4 @@ dfm_gp.py
 *.png
 matplotlibrc
 final.ipynb
+worksheet*.ipynb
