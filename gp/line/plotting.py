@@ -55,7 +55,8 @@ def plot_results(x, y, yerr, samples, truth=True, color="r", data_fig=None,
     samples = np.atleast_1d(samples)
     if len(samples.shape) == 2:
         lines = np.dot(np.vander(x0, 2), samples[:, :2].T)
-        q = np.percentile(lines, [16, 84], axis=1)
+        q = np.percentile(lines, [16, 84, 2.5, 97.5], axis=1)
+        data_ax.fill_between(x0, q[2], q[3], color=color, alpha=0.1)
         data_ax.fill_between(x0, q[0], q[1], color=color, alpha=0.3)
     else:
         data_ax.plot(x0, np.dot(np.vander(x0, 2), samples[:2]), color=color)
