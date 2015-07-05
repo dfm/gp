@@ -7,8 +7,12 @@ __all__ = ["benchmark"]
 
 import time
 import numpy as np
-from itertools import izip
 import matplotlib.pyplot as pl
+
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
 
 
 def benchmark(kernelfn, lnlikefn, params, N=2 ** np.arange(8, 12)):
