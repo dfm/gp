@@ -1,8 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__all__ = ["line", "utils", "benchmark", "interactive"]
+from . import data, utils, interactive
+from .corner import corner
+from .modeling import Model, ModelSet
+from .transit_model import SillyTransitModel
 
-from . import line
-from . import utils
-from .benchmarking import benchmark
+__all__ = ["Model", "ModelSet", "SillyTransitModel", "data", "corner", "utils",
+           "interactive"]
