@@ -18,7 +18,7 @@ from .transit_model import SillyTransitModel
 def setup_likelihood_sampler(kernel):
     # Pre-compute some stuff.
     x0 = np.linspace(-20, 20, 100)
-    r = x0[:, None] - x0[None, :]
+    r = np.abs(x0[:, None] - x0[None, :])
 
     # This function samples from the likelihood distribution.
     def sample_likelihood(amp, ell):
@@ -37,9 +37,9 @@ def setup_likelihood_sampler(kernel):
 def setup_conditional_sampler(x, y, yerr, kernel):
     # Pre-compute a bunch of things for speed.
     xs = np.linspace(-20, 20, 100)
-    rxx = x[:, None] - x[None, :]
-    rss = xs[:, None] - xs[None, :]
-    rxs = x[None, :] - xs[:, None]
+    rxx = np.abs(x[:, None] - x[None, :])
+    rss = np.abs(xs[:, None] - xs[None, :])
+    rxs = np.abs(x[None, :] - xs[:, None])
     ye2 = yerr ** 2
 
     model = SillyTransitModel(*true_parameters)
