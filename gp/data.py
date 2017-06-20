@@ -9,7 +9,7 @@ __all__ = ["generate_dataset", "true_parameters"]
 
 true_parameters = np.array([np.log(200.0), 0.0, 0.0])
 
-def generate_dataset(N=12*10, seed=421):
+def generate_dataset(N=12*10, seed=421, outliers=False):
     rng = np.random.RandomState(seed)
     x = np.sort(rng.uniform(-N / 6.0, N / 6.0, N))
     yerr = rng.uniform(10, 20, N)
@@ -23,5 +23,9 @@ def generate_dataset(N=12*10, seed=421):
     K[np.diag_indices_from(K)] += yerr**2
 
     y = rng.multivariate_normal(mean, K)
+
+    if outliers:
+        m = rng.rand(N) < 0.1
+        y[m] += outliers * rng.randn(m.sum())
 
     return x, y, yerr
