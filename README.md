@@ -2,8 +2,9 @@ This repository contains an interactive IPython worksheet (`worksheet.ipynb`)
 designed to introduce you to Gaussian Process models. Only very minimal
 experience with Python should be necessary to get something out of this.
 
-This worksheet was originally prepared for a lab section at the Penn State
-Astrostats summer school in 2014.
+Some of this worksheet was originally prepared for a lab section at the Penn
+State Astrostats summer school in 2014 and it has been updated and adapted
+several times since then.
 
 **Remember**: the best reference for anything related to Gaussian Processes is
 [Rasmussen & Williams](http://www.gaussianprocess.org/gpml/).
