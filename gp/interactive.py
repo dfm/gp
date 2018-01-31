@@ -29,6 +29,7 @@ def setup_likelihood_sampler(kernel):
         plt.plot(x0, y0.T, "k", alpha=0.5)
         plt.ylim(-800, 800)
         plt.xlim(-20, 20)
+        plt.show()
 
     w = interact(sample_likelihood, amp=(10, 500.0), ell=(1.0, 10.0))
     return w
@@ -84,6 +85,7 @@ def setup_conditional_sampler(x, y, yerr, kernel):
         plt.ylim(-250, 100)
         plt.xlim(-20, 20)
         plt.title("lnlike = {0}".format(ll))
+        plt.show()
 
     w = interactive(sample_conditional,
                     amp=(10.0, 500.0), ell=(0.5, 10.0),
